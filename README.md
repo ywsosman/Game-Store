@@ -6,6 +6,143 @@ A console-based Java application for a game store, demonstrating core Java and O
 
 This application simulates a game store where you can manage games across different platforms, handle player accounts with tier-based discounts, create orders, and run tournaments.
 
+## 📊 Class Diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class Genre {
+        <<enum>>
+        ACTION
+        ADVENTURE
+        RPG
+        SPORTS
+        STRATEGY
+        PUZZLE
+        SIMULATION
+        HORROR
+        +getDisplayName() String
+        +fromDisplayName(String) Genre
+    }
+
+    class OrderStatus {
+        <<enum>>
+        PENDING
+        CONFIRMED
+        CANCELLED
+        +getDisplayName() String
+    }
+
+    class Searchable~T~ {
+        <<interface>>
+        +searchByName(String) List~T~
+        +searchByGenre(Genre) List~T~
+    }
+
+    class GameStoreException {
+        +GameStoreException(String)
+    }
+    GameStoreException --|> RuntimeException
+
+    class InvalidPriceException
+    class InvalidRatingException
+    class TournamentFullException
+    class DuplicateRegistrationException
+    class EmptyOrderException
+
+    InvalidPriceException --|> GameStoreException
+    InvalidRatingException --|> GameStoreException
+    TournamentFullException --|> GameStoreException
+    DuplicateRegistrationException --|> GameStoreException
+    EmptyOrderException --|> GameStoreException
+
+    class Game {
+        <<abstract>>
+        -int id
+        -String name
+        -double price
+        -Genre genre
+        -double rating
+        +getPlatform() String*
+        +setPrice(double)
+        +setRating(double)
+    }
+
+    class PCGame {
+        -String operatingSystem
+        +getPlatform() String
+    }
+
+    class ConsoleGame {
+        -String consoleBrand
+        +getPlatform() String
+    }
+
+    class MobileGame {
+        -boolean freeToPlay
+        +getPlatform() String
+    }
+
+    Game <|-- PCGame
+    Game <|-- ConsoleGame
+    Game <|-- MobileGame
+    Game --> Genre
+
+    class Player {
+        <<abstract>>
+        -int id
+        -String name
+        -String email
+        +getPlayerType() String*
+    }
+
+    class RegularPlayer {
+        +getPlayerType() String
+    }
+
+    class VIPPlayer {
+        -double vipDiscountRate
+        +getPlayerType() String
+        +getDiscount() double
+    }
+
+    Player <|-- RegularPlayer
+    Player <|-- VIPPlayer
+
+    class Order {
+        -int id
+        -Player player
+        -List~Game~ games
+        -OrderStatus status
+        +addGame(Game)
+        +removeGame(int) boolean
+        +getSubtotal() double
+        +calculateTotal() double
+        +checkout()
+        +cancel()
+    }
+
+    Order --> Player : belongs to
+    Order --> "0..*" Game : contains
+    Order --> OrderStatus
+
+    class Tournament {
+        -int id
+        -String name
+        -int maxPlayers
+        -List~Player~ participants
+        -boolean started
+        -Player winner
+        +registerPlayer(Player)
+        +startTournament()
+        +getWinner() Player
+        +getMatchLog() String
+    }
+
+    Tournament --> "0..*" Player : participants
+```
+
 ## 🏗️ Project Structure
 
 ```
