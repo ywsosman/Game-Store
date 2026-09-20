@@ -164,6 +164,4 @@ java -cp target/classes org.example.Main
 
 
 
-## 📝 License
 
-This project is for educational purposes as part of a Java Fullstack course assignment.
