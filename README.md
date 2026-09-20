@@ -162,7 +162,7 @@ javac -d target/classes -sourcepath src/main/java src/main/java/org/example/Main
 java -cp target/classes org.example.Main
 ```
 
-> **Note:** The interactive console menu is not yet implemented (Phase 6). Currently, the models and business logic are complete and ready for integration.
+
 
 ## 📝 License
 
