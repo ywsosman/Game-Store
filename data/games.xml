@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<games>
+  <game type="PC">
+    <id>1</id>
+    <name>FIFA 27</name>
+    <price>59.99</price>
+    <genre>SPORTS</genre>
+    <rating>4.5</rating>
+    <os>Windows</os>
+  </game>
+  <game type="PC">
+    <id>2</id>
+    <name>GTA VI</name>
+    <price>69.99</price>
+    <genre>ACTION</genre>
+    <rating>4.8</rating>
+    <os>Windows</os>
+  </game>
+  <game type="Console">
+    <id>3</id>
+    <name>Elden Ring</name>
+    <price>49.99</price>
+    <genre>RPG</genre>
+    <rating>4.9</rating>
+    <platform>PlayStation</platform>
+  </game>
+  <game type="Console">
+    <id>4</id>
+    <name>Halo Infinite</name>
+    <price>39.99</price>
+    <genre>ACTION</genre>
+    <rating>4.2</rating>
+    <platform>Xbox</platform>
+  </game>
+  <game type="Mobile">
+    <id>5</id>
+    <name>Clash Royale</name>
+    <price>0.0</price>
+    <genre>STRATEGY</genre>
+    <rating>4.2</rating>
+    <isFreeToPlay>true</isFreeToPlay>
+  </game>
+  <game type="Mobile">
+    <id>6</id>
+    <name>Pokemon GO</name>
+    <price>0.0</price>
+    <genre>ADVENTURE</genre>
+    <rating>3.8</rating>
+    <isFreeToPlay>true</isFreeToPlay>
+  </game>
+</games>

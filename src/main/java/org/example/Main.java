@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.data.DataManager;
 import org.example.enums.Genre;
 import org.example.exception.DuplicateRegistrationException;
 import org.example.exception.EmptyOrderException;
@@ -20,7 +21,7 @@ import org.example.service.GameStore;
 import java.util.List;
 
 /**
- * Test harness demonstrating all features and exception protections built in Phases 1–4.
+ * Test harness demonstrating all features and exception protections built in Phases 1–5.
  */
 public class Main {
 
@@ -217,6 +218,32 @@ public class Main {
             System.out.println("FAIL (no exception)");
         } catch (TournamentFullException e) {
             System.out.println("✓ Caught: " + e.getMessage());
+        }
+
+        // ====================================================================
+        // 11. XML DATA PERSISTENCE TEST
+        // ====================================================================
+        System.out.println("\n── 11. XML Data Persistence ────────────────────────");
+
+        String dataDir = "data";
+        try {
+            System.out.println("Saving store data to XML in directory '" + dataDir + "'...");
+            DataManager.saveData(store, dataDir);
+            System.out.println("✓ Saved successfully: games.xml, players.xml, orders.xml, tournaments.xml");
+
+            System.out.println("Creating fresh GameStore and restoring from XML...");
+            GameStore restoredStore = new GameStore();
+            DataManager.loadData(restoredStore, dataDir);
+
+            System.out.println("✓ Restored entities successfully:");
+            System.out.println("   - Games:       " + restoredStore.getGames().size());
+            System.out.println("   - Players:     " + restoredStore.getPlayers().size());
+            System.out.println("   - Orders:      " + restoredStore.getOrders().size());
+            System.out.println("   - Tournaments: " + restoredStore.getTournaments().size());
+
+        } catch (Exception e) {
+            System.out.println("FAIL: DataManager persistence error: " + e.getMessage());
+            e.printStackTrace();
         }
 
         System.out.println("\n══════════════════════════════════════════════════════");

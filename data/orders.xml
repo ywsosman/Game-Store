@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<orders>
+  <order>
+    <id>1</id>
+    <playerId>1</playerId>
+    <status>CONFIRMED</status>
+    <gameIds>
+      <gameId>1</gameId>
+      <gameId>3</gameId>
+    </gameIds>
+  </order>
+  <order>
+    <id>2</id>
+    <playerId>2</playerId>
+    <status>CONFIRMED</status>
+    <gameIds>
+      <gameId>2</gameId>
+      <gameId>5</gameId>
+    </gameIds>
+  </order>
+  <order>
+    <id>3</id>
+    <playerId>1</playerId>
+    <status>PENDING</status>
+    <gameIds/>
+  </order>
+</orders>

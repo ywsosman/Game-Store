@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<tournaments>
+  <tournament>
+    <id>1</id>
+    <name>Gaming World Cup</name>
+    <maxPlayers>8</maxPlayers>
+    <started>true</started>
+    <winnerId>3</winnerId>
+    <participantIds>
+      <participantId>1</participantId>
+      <participantId>2</participantId>
+      <participantId>3</participantId>
+      <participantId>4</participantId>
+      <participantId>5</participantId>
+    </participantIds>
+  </tournament>
+  <tournament>
+    <id>2</id>
+    <name>Tiny Cup</name>
+    <maxPlayers>2</maxPlayers>
+    <started>false</started>
+    <winnerId>0</winnerId>
+    <participantIds>
+      <participantId>1</participantId>
+      <participantId>2</participantId>
+    </participantIds>
+  </tournament>
+</tournaments>

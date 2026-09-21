@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<players>
+  <player type="VIP">
+    <id>1</id>
+    <name>Ahmed</name>
+    <email>ahmed@example.com</email>
+    <discount>0.2</discount>
+  </player>
+  <player type="Regular">
+    <id>2</id>
+    <name>Sara</name>
+    <email>sara@example.com</email>
+    <discount>0.0</discount>
+  </player>
+  <player type="VIP">
+    <id>3</id>
+    <name>Omar</name>
+    <email>omar@example.com</email>
+    <discount>0.35</discount>
+  </player>
+  <player type="Regular">
+    <id>4</id>
+    <name>Layla</name>
+    <email>layla@example.com</email>
+    <discount>0.0</discount>
+  </player>
+  <player type="Regular">
+    <id>5</id>
+    <name>Khaled</name>
+    <email>khaled@example.com</email>
+    <discount>0.0</discount>
+  </player>
+</players>

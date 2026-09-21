@@ -198,6 +198,33 @@ public class GameStore implements Searchable<Game> {
         return null;
     }
 
+    // ==================== PERSISTENCE HELPERS ====================
+
+    /**
+     * Clears all entities and resets ID counters to 1.
+     */
+    public void clear() {
+        games.clear();
+        players.clear();
+        orders.clear();
+        tournaments.clear();
+        nextGameId = 1;
+        nextPlayerId = 1;
+        nextOrderId = 1;
+        nextTournamentId = 1;
+    }
+
+    /**
+     * Synchronizes auto-increment ID counters based on loaded data.
+     * Ensures new entities receive IDs higher than any existing loaded entity.
+     */
+    public void syncNextIds() {
+        nextGameId = games.stream().mapToInt(Game::getId).max().orElse(0) + 1;
+        nextPlayerId = players.stream().mapToInt(Player::getId).max().orElse(0) + 1;
+        nextOrderId = orders.stream().mapToInt(Order::getId).max().orElse(0) + 1;
+        nextTournamentId = tournaments.stream().mapToInt(Tournament::getId).max().orElse(0) + 1;
+    }
+
     // ==================== GETTERS ====================
 
     public List<Game> getGames() {
