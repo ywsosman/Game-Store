@@ -1,10 +1,20 @@
-# 🎮 Game Store
+# 🎮 Game Store Application
 
-A console-based Java application for a game store, demonstrating core Java and Object-Oriented Programming principles.
+A full-featured, console-based Java application for managing a game store, demonstrating core Java, Object-Oriented Programming (OOP) principles, XML data persistence, and interactive CLI interfaces.
+
+---
 
 ## 📋 Project Overview
 
-This application simulates a game store where you can manage games across different platforms, handle player accounts with tier-based discounts, create orders, and run tournaments.
+This application simulates a complete Game Store management ecosystem:
+* **Game Catalog Management**: Multi-platform games (PC, Console, Mobile) with search by title/genre and sorting by price/rating.
+* **Player Tier Accounts**: `RegularPlayer` and `VIPPlayer` with configurable discounts and strict exception handling.
+* **Shopping Cart & Orders**: Dynamic order building, polymorphic price and discount calculations, and receipt generation.
+* **Tournament System**: Single-elimination tournament match simulation with random outcomes, bye support, and winner determination.
+* **XML Data Persistence**: Save and reload store data (`games.xml`, `players.xml`, `orders.xml`, `tournaments.xml`) using DOM XML parsers.
+* **Interactive Terminal CLI**: Menu-driven interface using `Scanner` with crash-prevention input validation.
+
+---
 
 ## 📊 Class Diagram
 
@@ -23,7 +33,6 @@ classDiagram
         SIMULATION
         HORROR
         +getDisplayName() String
-        +fromDisplayName(String) Genre
     }
 
     class OrderStatus {
@@ -50,12 +59,14 @@ classDiagram
     class TournamentFullException
     class DuplicateRegistrationException
     class EmptyOrderException
+    class IneligibleDiscountException
 
     InvalidPriceException --|> GameStoreException
     InvalidRatingException --|> GameStoreException
     TournamentFullException --|> GameStoreException
     DuplicateRegistrationException --|> GameStoreException
     EmptyOrderException --|> GameStoreException
+    IneligibleDiscountException --|> GameStoreException
 
     class Game {
         <<abstract>>
@@ -65,8 +76,6 @@ classDiagram
         -Genre genre
         -double rating
         +getPlatform() String*
-        +setPrice(double)
-        +setRating(double)
     }
 
     class PCGame {
@@ -75,7 +84,7 @@ classDiagram
     }
 
     class ConsoleGame {
-        -String consoleBrand
+        -String platform
         +getPlatform() String
     }
 
@@ -94,17 +103,18 @@ classDiagram
         -int id
         -String name
         -String email
+        -double discount
         +getPlayerType() String*
+        +setDiscount(double)
     }
 
     class RegularPlayer {
+        +setDiscount(double) [throws IneligibleDiscountException]
         +getPlayerType() String
     }
 
     class VIPPlayer {
-        -double vipDiscountRate
         +getPlayerType() String
-        +getDiscount() double
     }
 
     Player <|-- RegularPlayer
@@ -115,16 +125,12 @@ classDiagram
         -Player player
         -List~Game~ games
         -OrderStatus status
-        +addGame(Game)
-        +removeGame(int) boolean
-        +getSubtotal() double
         +calculateTotal() double
         +checkout()
-        +cancel()
     }
 
-    Order --> Player : belongs to
-    Order --> "0..*" Game : contains
+    Order --> Player
+    Order --> "0..*" Game
     Order --> OrderStatus
 
     class Tournament {
@@ -132,173 +138,169 @@ classDiagram
         -String name
         -int maxPlayers
         -List~Player~ participants
-        -boolean started
         -Player winner
         +registerPlayer(Player)
         +startTournament()
-        +getWinner() Player
-        +getMatchLog() String
     }
 
-    Tournament --> "0..*" Player : participants
+    Tournament --> "0..*" Player
+
+    class GameStore {
+        -List~Game~ games
+        -List~Player~ players
+        -List~Order~ orders
+        -List~Tournament~ tournaments
+        +addGame(Game)
+        +addPlayer(Player)
+        +createOrder(Player)
+        +createTournament(String, int)
+        +sortByPrice()
+        +sortByRating()
+        +syncNextIds()
+    }
+
+    GameStore ..|> Searchable~Game~
+
+    class DataManager {
+        <<utility>>
+        +saveData(GameStore, String)
+        +loadData(GameStore, String)
+    }
+
+    class ConsoleMenu {
+        -GameStore store
+        -Scanner scanner
+        -String dataDir
+        +start()
+    }
+
+    ConsoleMenu --> GameStore
+    ConsoleMenu ..> DataManager
 ```
 
-## 🏗️ Project Structure
+---
 
-```
+## 🏗️ Project Architecture & File Map
+
+```text
 src/main/java/org/example/
-├── Main.java                              # Application entry point
+├── Main.java                              # App Launcher & boot sequence
 │
 ├── enums/
-│   ├── Genre.java                         # Game genres (ACTION, RPG, SPORTS, etc.)
-│   └── OrderStatus.java                   # Order lifecycle (PENDING, CONFIRMED, CANCELLED)
+│   ├── Genre.java                         # 8 Game genres (ACTION, RPG, SPORTS, etc.)
+│   └── OrderStatus.java                   # Lifecycle states (PENDING, CONFIRMED, CANCELLED)
 │
 ├── interfaces/
-│   └── Searchable.java                    # Generic search contract for catalogs
+│   └── Searchable.java                    # Generic catalog search contract
 │
 ├── exception/
-│   ├── GameStoreException.java            # Base exception for all domain errors
-│   ├── InvalidPriceException.java         # Thrown when game price < 0
-│   ├── InvalidRatingException.java        # Thrown when rating outside 0.0–5.0
-│   ├── TournamentFullException.java       # Thrown when tournament at max capacity
-│   ├── DuplicateRegistrationException.java # Thrown when player already registered
-│   └── EmptyOrderException.java           # Thrown when checking out empty order
+│   ├── GameStoreException.java            # Base exception for store domain errors
+│   ├── InvalidPriceException.java         # Price < 0 validation
+│   ├── InvalidRatingException.java        # Rating outside 0.0–5.0 validation
+│   ├── TournamentFullException.java       # Tournament capacity validation
+│   ├── DuplicateRegistrationException.java # Duplicate player registration check
+│   ├── EmptyOrderException.java           # Empty shopping cart checkout check
+│   └── IneligibleDiscountException.java   # Non-VIP discount assignment prevention
 │
 ├── model/
 │   ├── game/
-│   │   ├── Game.java                      # Abstract base class for all games
-│   │   ├── PCGame.java                    # PC platform games
-│   │   ├── ConsoleGame.java               # Console platform games
-│   │   └── MobileGame.java               # Mobile platform games
+│   │   ├── Game.java                      # Abstract base game model
+│   │   ├── PCGame.java                    # PC platform subclass (OS)
+│   │   ├── ConsoleGame.java               # Console platform subclass (Platform)
+│   │   └── MobileGame.java               # Mobile platform subclass (Free-to-play flag)
 │   │
 │   ├── player/
-│   │   ├── Player.java                    # Abstract base class for all players
-│   │   ├── RegularPlayer.java             # Standard player (no discount)
-│   │   └── VIPPlayer.java                 # Premium player (configurable discount)
+│   │   ├── Player.java                    # Abstract base player model (configurable discount)
+│   │   ├── RegularPlayer.java             # Standard tier (0% discount enforced)
+│   │   └── VIPPlayer.java                 # Premium tier (configurable discount rates)
 │   │
 │   ├── order/
-│   │   └── Order.java                     # Shopping cart with checkout & discount logic
+│   │   └── Order.java                     # Shopping cart with polymorphic checkout
 │   │
 │   └── tournament/
-│       └── Tournament.java                # Competition with elimination bracket
+│       └── Tournament.java                # Single-elimination tournament bracket engine
 │
-├── service/                               # (Phase 4 — upcoming)
-├── data/                                  # (Phase 5 — upcoming)
-└── ui/                                    # (Phase 6 — upcoming)
+├── service/
+│   └── GameStore.java                     # Central store service & search/sort manager
+│
+├── data/
+│   └── DataManager.java                   # DOM XML serialization & deserialization utility
+│
+└── ui/
+    └── ConsoleMenu.java                   # Interactive terminal user interface
 ```
-
-## 🧩 What's Been Implemented
-
-### Phase 1 — Foundation
-
-**Enums:**
-- `Genre` — 8 game genres (ACTION, ADVENTURE, RPG, SPORTS, STRATEGY, PUZZLE, SIMULATION, HORROR) with display names and case-insensitive lookup.
-- `OrderStatus` — Order lifecycle states: PENDING → CONFIRMED / CANCELLED.
-
-**Interfaces:**
-- `Searchable<T>` — Generic search contract with `searchByName()` and `searchByGenre()` methods.
-
-**Custom Exceptions (all extend `GameStoreException`):**
-| Exception | Trigger |
-|---|---|
-| `InvalidPriceException` | Game price set to a negative value |
-| `InvalidRatingException` | Game rating set outside 0.0–5.0 range |
-| `TournamentFullException` | Player registration when tournament is at capacity |
-| `DuplicateRegistrationException` | Player already registered in the same tournament |
-| `EmptyOrderException` | Attempting to checkout an order with no games |
 
 ---
 
-### Phase 2 — Domain Models
+## 🧩 Key Implemented Features Across All 7 Phases
 
-**Game Hierarchy:**
+### Phase 1 — Architecture Foundation
+* Custom exceptions extending `GameStoreException` → `RuntimeException`.
+* Type-safe Enums (`Genre`, `OrderStatus`) with case-insensitive conversion.
+* Generic interface `Searchable<T>`.
 
-| Class | Type | Key Field | Description |
-|---|---|---|---|
-| `Game` | Abstract | — | Base class with `id`, `name`, `price`, `genre` (enum), `rating`. Validates price ≥ 0 and rating 0–5 |
-| `PCGame` | Concrete | `operatingSystem` | Games for PC (Windows, Linux, macOS) |
-| `ConsoleGame` | Concrete | `consoleBrand` | Games for consoles (PlayStation, Xbox, Nintendo) |
-| `MobileGame` | Concrete | `freeToPlay` | Mobile games with free-to-play flag |
+### Phase 2 — Core Domain Models
+* **Game Hierarchy**: Abstract `Game` base class extended by `PCGame`, `ConsoleGame`, and `MobileGame`.
+* **Player Hierarchy**: Abstract `Player` base class extended by `RegularPlayer` and `VIPPlayer`.
 
-**Player Hierarchy:**
+### Phase 3 — Business Logic & Polymorphic Discounts
+* Configurable discounts owned by `Player` base class and polymorphically applied in `Order.calculateTotal()`.
+* Strict discount restriction: `RegularPlayer` throws `IneligibleDiscountException` if assigned a discount `> 0`.
+* Tournament bracket elimination engine with randomized match resolution and auto-byes.
 
-| Class | Type | Discount | Description |
-|---|---|---|---|
-| `Player` | Abstract | — | Base class with `id`, `name`, `email` |
-| `RegularPlayer` | Concrete | None | Standard player, pays full price |
-| `VIPPlayer` | Concrete | 20% (configurable) | Premium player with configurable discount rate |
+### Phase 4 — Service Layer (`GameStore`)
+* Centralized manager handling entity registration, auto-increment ID generation, catalog searching (Title/Genre), and sorting (Price/Rating).
 
----
+### Phase 5 — XML Data Persistence (`DataManager`)
+* Serializes and deserializes application state to/from formatted XML files (`games.xml`, `players.xml`, `orders.xml`, `tournaments.xml`) using standard Java DOM parsers.
+* Restores entity graphs, links IDs, and resynchronizes auto-increment counters.
 
-### Phase 3 — Business Logic
+### Phase 6 — Interactive Terminal UI (`ConsoleMenu`)
+* Full menu-driven interactive terminal interface using `Scanner`.
+* Complete user management: Register Regular/VIP players, upgrade Regular players to VIP, reconfigure VIP discounts.
+* Crash-proof input sanitization (`readInt`, `readDouble`, `readNonEmptyString`).
 
-**Order:**
-- Add/remove games from a cart.
-- Calculate total price with VIP discount applied.
-- Checkout validation — cannot checkout an empty order.
-- Status tracking: PENDING → CONFIRMED / CANCELLED.
-- Receipt-style `toString()` output with discount breakdown.
-
-**Tournament:**
-- Player registration with capacity limits and duplicate checks.
-- Elimination bracket simulation with randomized matchups.
-- Bye support for odd number of players.
-- Match log recording every round and result.
-- Winner determination.
+### Phase 7 — Final Polish & Verification
+* Full end-to-end testing, exit auto-save, and complete repo documentation.
 
 ---
 
-## 🔧 OOP Concepts Used
+## ⚙️ Prerequisites & Execution
 
-| Concept | Implementation |
-|---|---|
-| **Encapsulation** | Private fields with getters/setters. Validation in setters (price, rating) |
-| **Inheritance** | `Game` → `PCGame` / `ConsoleGame` / `MobileGame`. `Player` → `RegularPlayer` / `VIPPlayer` |
-| **Abstract Classes** | `Game` and `Player` — cannot be instantiated directly |
-| **Method Overriding** | `getPlatform()`, `getPlayerType()`, `toString()` overridden in each subclass |
-| **Polymorphism** | `Order` works with any `Player` subtype; `Tournament` manages `List<Player>` |
-| **Interface** | `Searchable<T>` — generic search contract |
-| **Enums** | `Genre` (with display names + lookup), `OrderStatus` (order lifecycle) |
-| **Custom Exceptions** | 5 domain exceptions extending `GameStoreException` → `RuntimeException` |
-| **Java Collections** | `List<Game>`, `List<Player>`, `ArrayList` used throughout |
-| **Lambda Expressions** | `removeIf(game -> game.getId() == gameId)` in Order |
+### Requirements
+* **Java 26** (or OpenJDK 21+)
+* No external third-party libraries required (built using standard Java JDK APIs).
 
-## 🛡️ Edge Cases Handled
-
-- ❌ Negative game prices → `InvalidPriceException`
-- ❌ Rating outside 0.0–5.0 → `InvalidRatingException`
-- ❌ Duplicate tournament registration → `DuplicateRegistrationException`
-- ❌ Full tournament registration → `TournamentFullException`
-- ❌ Empty order checkout → `EmptyOrderException`
-- ❌ Starting a tournament twice → `IllegalStateException`
-- ❌ Starting a tournament with < 2 players → `IllegalStateException`
-
-## 🔜 Upcoming Phases
-
-| Phase | Description | Status |
-|---|---|---|
-| Phase 4 | `GameStore` service — central manager with search & sort | ⬜ Planned |
-| Phase 5 | XML persistence — save/load data to files | ⬜ Planned |
-| Phase 6 | Console menu UI — interactive user interface | ⬜ Planned |
-| Phase 7 | README finalization, testing, polish | ⬜ Planned |
-
-## ⚙️ Prerequisites
-
-- **Java 26** (OpenJDK 26+)
-- No external frameworks or dependencies required
-
-## 🚀 How to Run
-
-### Compile
-```bash
-javac -d target/classes -sourcepath src/main/java src/main/java/org/example/Main.java
+### Compile the Application
+```powershell
+& "C:\Users\Youssef\.jdks\openjdk-26.0.2.1\bin\javac.exe" -d target/classes -sourcepath src/main/java (Get-ChildItem -Path src/main/java -Recurse -Filter *.java | ForEach-Object { $_.FullName })
 ```
 
-### Run
-```bash
-java -cp target/classes org.example.Main
+### Run the Interactive Terminal Application
+```powershell
+& "C:\Users\Youssef\.jdks\openjdk-26.0.2.1\bin\java.exe" -classpath "target/classes" org.example.Main
 ```
 
+---
 
+## 💻 Sample CLI Terminal Walkthrough
 
+```text
+╔════════════════════════════════════════════════════════════════╗
+║            🎮 WELCOME TO GAME STORE MANAGEMENT CLI             ║
+╚════════════════════════════════════════════════════════════════╝
+[SYSTEM] Checking for existing persistent data in 'data/'...
+[SYSTEM] Loaded 6 games, 5 players, 3 orders, and 2 tournaments from XML!
 
+╔════════════════════════════════════════════════════════════════╗
+║                          MAIN MENU                             ║
+╚════════════════════════════════════════════════════════════════╝
+  1. 🎮 Game Catalog & Inventory
+  2. 👤 Player Management & VIP Upgrades
+  3. 🛒 Shopping Orders & Checkout
+  4. 🏆 Tournaments & Match Simulation
+  5. 💾 Save / Reload Store Data (XML)
+  0. 🚪 Exit Application
+
+Select an option [0-5]: 
+```
