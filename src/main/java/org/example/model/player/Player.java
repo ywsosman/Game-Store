@@ -1,5 +1,7 @@
 package org.example.model.player;
 
+import org.example.exception.IneligibleDiscountException;
+
 /**
  * Abstract base class for all player types.
  * Each subclass defines its own player type label and default discount.
@@ -67,12 +69,12 @@ public abstract class Player {
     }
 
     /**
-     * Sets the discount rate. Can be called from anywhere (Main, UI, etc.)
-     * to customize the discount for any player at runtime.
+     * Sets the discount rate. Subclasses enforce eligibility.
      *
      * @param discount the discount rate (0.0 to 1.0)
+     * @throws IneligibleDiscountException if the player type is not eligible for discounts
      */
-    public void setDiscount(double discount) {
+    public void setDiscount(double discount) throws IneligibleDiscountException {
         this.discount = discount;
     }
 

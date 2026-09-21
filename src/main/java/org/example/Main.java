@@ -3,6 +3,7 @@ package org.example;
 import org.example.enums.Genre;
 import org.example.exception.DuplicateRegistrationException;
 import org.example.exception.EmptyOrderException;
+import org.example.exception.IneligibleDiscountException;
 import org.example.exception.InvalidPriceException;
 import org.example.exception.TournamentFullException;
 import org.example.model.game.ConsoleGame;
@@ -19,7 +20,7 @@ import org.example.service.GameStore;
 import java.util.List;
 
 /**
- * Test harness demonstrating all features built in Phases 1–4.
+ * Test harness demonstrating all features and exception protections built in Phases 1–4.
  */
 public class Main {
 
@@ -77,16 +78,16 @@ public class Main {
         }
 
         // ====================================================================
-        // 3. CONFIGURABLE DISCOUNT DEMO
+        // 3. CONFIGURABLE VIP DISCOUNT DEMO
         // ====================================================================
-        System.out.println("\n── 3. Configurable Discount ────────────────────────");
+        System.out.println("\n── 3. Configurable VIP Discount ────────────────────");
 
-        System.out.println("Sara's discount before: " + (int)(sara.getDiscount() * 100) + "%");
-        sara.setDiscount(0.10);  // Give Sara a 10% promo discount
-        System.out.println("Sara's discount after promo: " + (int)(sara.getDiscount() * 100) + "%");
+        System.out.println("Omar's VIP discount before: " + (int)(omar.getDiscount() * 100) + "%");
+        omar.setDiscount(0.35);  // Reconfigure VIP discount to 35%
+        System.out.println("Omar's VIP discount after boost: " + (int)(omar.getDiscount() * 100) + "%");
 
         // ====================================================================
-        // 4. CREATE ORDER & CALCULATE TOTAL (VIP)
+        // 4. CREATE ORDER & CALCULATE TOTAL (VIP 20%)
         // ====================================================================
         System.out.println("\n── 4. Ahmed's Order (VIP 20%) ──────────────────────");
 
@@ -96,9 +97,9 @@ public class Main {
         System.out.println(ahmedOrder);
 
         // ====================================================================
-        // 5. CREATE ORDER & CALCULATE TOTAL (Regular with promo)
+        // 5. CREATE ORDER & CALCULATE TOTAL (Regular 0%)
         // ====================================================================
-        System.out.println("\n── 5. Sara's Order (Regular 10% promo) ─────────────");
+        System.out.println("\n── 5. Sara's Order (Regular 0%) ────────────────────");
 
         Order saraOrder = store.createOrder(sara);
         saraOrder.addGame(gtaPC);
@@ -165,12 +166,21 @@ public class Main {
         System.out.println(worldCup.getMatchLog());
 
         // ====================================================================
-        // 10. EDGE CASES
+        // 10. EDGE CASES & EXCEPTION HANDLING
         // ====================================================================
-        System.out.println("── 10. Edge Cases ──────────────────────────────────");
+        System.out.println("── 10. Edge Cases & Exception Handling ─────────────");
+
+        // Non-VIP discount attempt
+        System.out.print("  Non-VIP discount: ");
+        try {
+            sara.setDiscount(0.10); // Regular player cannot have discount
+            System.out.println("FAIL (no exception)");
+        } catch (IneligibleDiscountException e) {
+            System.out.println("✓ Caught: " + e.getMessage());
+        }
 
         // Negative price
-        System.out.print("  Negative price: ");
+        System.out.print("  Negative price:   ");
         try {
             new PCGame(0, "Bad Game", -10.00, Genre.ACTION, 3.0, "Windows");
             System.out.println("FAIL (no exception)");
@@ -179,7 +189,7 @@ public class Main {
         }
 
         // Empty order checkout
-        System.out.print("  Empty checkout:  ");
+        System.out.print("  Empty checkout:   ");
         try {
             Order emptyOrder = store.createOrder(ahmed);
             emptyOrder.checkout();
@@ -189,7 +199,7 @@ public class Main {
         }
 
         // Duplicate registration
-        System.out.print("  Duplicate reg:   ");
+        System.out.print("  Duplicate reg:    ");
         try {
             worldCup.registerPlayer(ahmed);
             System.out.println("FAIL (no exception)");
@@ -198,7 +208,7 @@ public class Main {
         }
 
         // Full tournament
-        System.out.print("  Full tournament: ");
+        System.out.print("  Full tournament:  ");
         try {
             Tournament tiny = store.createTournament("Tiny Cup", 2);
             tiny.registerPlayer(ahmed);
