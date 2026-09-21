@@ -1,19 +1,20 @@
 package org.example.model.player;
 
-
-
 /**
  * Abstract base class for all player types.
- * Each subclass defines its own player type label.
+ * Each subclass defines its own player type label and default discount.
+ * The discount is configurable at runtime via setDiscount().
  */
 public abstract class Player {
 
     private int id;
     private String name;
     private String email;
+    private double discount;
 
     // Default constructor
     protected Player() {
+        this.discount = 0.0;
     }
 
     // Parameterized constructor
@@ -21,6 +22,7 @@ public abstract class Player {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.discount = 0.0;
     }
 
     /**
@@ -54,8 +56,32 @@ public abstract class Player {
         this.email = email;
     }
 
+    /**
+     * Returns the discount rate as a decimal between 0.0 and 1.0.
+     * For example, 0.20 represents a 20% discount.
+     *
+     * @return the discount rate
+     */
+    public double getDiscount() {
+        return discount;
+    }
+
+    /**
+     * Sets the discount rate. Can be called from anywhere (Main, UI, etc.)
+     * to customize the discount for any player at runtime.
+     *
+     * @param discount the discount rate (0.0 to 1.0)
+     */
+    public void setDiscount(double discount) {
+        this.discount = discount;
+    }
+
     @Override
     public String toString() {
+        if (discount > 0) {
+            return String.format("%-4d | %-20s | %-25s | %-8s | %d%% discount",
+                    id, name, email, getPlayerType(), (int) (discount * 100));
+        }
         return String.format("%-4d | %-20s | %-25s | %s",
                 id, name, email, getPlayerType());
     }

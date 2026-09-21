@@ -4,15 +4,14 @@ import org.example.enums.OrderStatus;
 import org.example.exception.EmptyOrderException;
 import org.example.model.game.Game;
 import org.example.model.player.Player;
-import org.example.model.player.VIPPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Represents an order belonging to a player, containing a list of games.
- * Supports adding/removing games, calculating the total with VIP discount,
- * and checking out.
+ * Supports adding/removing games, calculating the total with the player's
+ * discount applied, and checking out.
  */
 public class Order {
 
@@ -71,20 +70,14 @@ public class Order {
 
     /**
      * Calculates the final total after applying the player's discount.
-     * Only VIP players receive a discount. Regular players pay full price.
+     * The discount is determined by the player's type and configuration.
      *
      * @return the final total price
      */
     public double calculateTotal() {
         double subtotal = getSubtotal();
-
-        if (player instanceof VIPPlayer) {
-            VIPPlayer vip = (VIPPlayer) player;
-            double discountAmount = subtotal * vip.getDiscount();
-            return subtotal - discountAmount;
-        }
-
-        return subtotal;
+        double discountAmount = subtotal * player.getDiscount();
+        return subtotal - discountAmount;
     }
 
     /**
@@ -158,11 +151,11 @@ public class Order {
         double subtotal = getSubtotal();
         sb.append(String.format("  Subtotal:        $%.2f\n", subtotal));
 
-        if (player instanceof VIPPlayer) {
-            VIPPlayer vip = (VIPPlayer) player;
-            double discountAmount = subtotal * vip.getDiscount();
-            sb.append(String.format("  VIP discount (%d%%): -$%.2f\n",
-                    (int) (vip.getDiscount() * 100), discountAmount));
+        double discount = player.getDiscount();
+        if (discount > 0) {
+            double discountAmount = subtotal * discount;
+            sb.append(String.format("  %s discount (%d%%): -$%.2f\n",
+                    player.getPlayerType(), (int) (discount * 100), discountAmount));
         }
 
         sb.append("  ─────────────────────\n");
